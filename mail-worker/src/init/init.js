@@ -45,7 +45,7 @@ const init = {
 		try {
 			await c.env.db.prepare(`ALTER TABLE setting ADD COLUMN login_domain INTEGER NOT NULL DEFAULT 0;`).run();
 		} catch (e) {
-			console.warn(`通过字段，原因：${e.message}`);
+			console.error(e.message)
 		}
 	},
 
