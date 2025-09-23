@@ -10,18 +10,6 @@
       </div>
     </div>
     <div class="toolbar">
-      <el-dropdown>
-        <div class="translate icon-item">
-          <Icon icon="carbon:ibm-watson-language-translator"/>
-        </div>
-        <template #dropdown>
-          <el-dropdown-menu>
-            <el-dropdown-item @click="changeLang('zh')">简体中文</el-dropdown-item>
-            <el-dropdown-item @click="changeLang('zhTW')">繁體中文</el-dropdown-item>
-            <el-dropdown-item @click="changeLang('en')">English</el-dropdown-item>
-          </el-dropdown-menu>
-        </template>
-      </el-dropdown>
       <div v-if="uiStore.dark" class="sun-icon icon-item" @click="openDark($event)">
         <Icon icon="mingcute:sun-fill"/>
       </div>
@@ -96,7 +84,6 @@ import {computed, ref} from "vue";
 import {useSettingStore} from "@/store/setting.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
-import {copyText} from "@/utils/clipboard-utils.js";
 import {setExtend} from "@/utils/day.js"
 
 const {t} = useI18n();
@@ -449,11 +436,6 @@ function formatName(email) {
 
   .sun-icon {
     font-size: 24px;
-  }
-
-  .translate {
-    padding-top: 2px;
-    font-size: 21px;
   }
 
   .avatar {

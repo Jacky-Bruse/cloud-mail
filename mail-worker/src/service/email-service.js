@@ -489,7 +489,8 @@ const emailService = {
 			.where(and(
 				inArray(email.userId, userIds),
 				eq(email.type, type),
-				eq(email.isDel, del)
+				eq(email.isDel, del),
+				ne(email.status, emailConst.status.SAVING),
 			))
 			.groupBy(email.userId);
 		return result;
@@ -611,6 +612,11 @@ const emailService = {
 		}).where(eq(email.emailId, emailId)).returning().get();
 	},
 
+	async completeReceiveAll(c) {
+			await c.env.db.prepare(`UPDATE email as e SET status = ${emailConst.status.RECEIVE} WHERE status = ${emailConst.status.SAVING} AND EXISTS (SELECT 1 FROM account WHERE account_id = e.account_id)`).run();
+			await c.env.db.prepare(`UPDATE email as e SET status = ${emailConst.status.NOONE} WHERE status = ${emailConst.status.SAVING} AND NOT EXISTS (SELECT 1 FROM account WHERE account_id = e.account_id)`).run();
+	},
+
 	async batchDelete(c, params) {
 		let { sendName, sendEmail, toEmail, subject, startTime, endTime, type  } = params
 
@@ -655,6 +661,11 @@ const emailService = {
 		await attService.removeByEmailIds(c, emailIds);
 
 		await orm(c).delete(email).where(conditions.length > 1 ? and(...conditions) : conditions[0]).run();
+	},
+
+	async physicsDeleteByAccountId(c, accountId) {
+		await attService.removeByAccountId(c, accountId);
+		await orm(c).delete(email).where(eq(email.accountId, accountId)).run();
 	}
 };
 
