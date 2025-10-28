@@ -15,7 +15,6 @@ export async function init() {
     const accountStore = useAccountStore();
 
     const token = localStorage.getItem('token');
-
     if (!settingStore.lang) {
         let lang = navigator.language
         if (lang.split('-')[0] === 'zh') {
