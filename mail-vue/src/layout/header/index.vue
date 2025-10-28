@@ -158,7 +158,7 @@ function userInfoHide(e) {
 
 async function copyEmail(email) {
   try {
-    await copyText(email);
+    await navigator.clipboard.writeText(email);
     ElMessage({
       message: t('copySuccessMsg'),
       type: 'success',

@@ -11,11 +11,13 @@ import app from '../hono/hono';
 const exclude = [
 	'/login',
 	'/register',
-	'/file',
+	'/oss',
 	'/setting/websiteConfig',
 	'/webhooks',
 	'/init',
-	'/public/genToken'
+	'/public/genToken',
+	'/telegram',
+	'/test'
 ];
 
 const requirePerms = [
@@ -34,6 +36,7 @@ const requirePerms = [
 	'/allEmail/list',
 	'/allEmail/delete',
 	'/setting/setBackground',
+	'/setting/deleteBackground',
 	'/setting/set',
 	'/setting/query',
 	'/user/delete',
@@ -73,7 +76,7 @@ const premKey = {
 	'all-email:query': ['/allEmail/list'],
 	'all-email:delete': ['/allEmail/delete','/allEmail/batchDelete'],
 	'setting:query': ['/setting/query'],
-	'setting:set': ['/setting/set', '/setting/setBackground'],
+	'setting:set': ['/setting/set', '/setting/setBackground','/setting/deleteBackground'],
 	'analysis:query': ['/analysis/echarts'],
 	'reg-key:add': ['/regKey/add'],
 	'reg-key:query': ['/regKey/list','/regKey/history'],
@@ -83,10 +86,6 @@ const premKey = {
 app.use('*', async (c, next) => {
 
 	const path = c.req.path;
-
-	if (path.startsWith('/test')) {
-		return await next();
-	}
 
 	const index = exclude.findIndex(item => {
 		return path.startsWith(item);
@@ -161,7 +160,9 @@ app.use('*', async (c, next) => {
 });
 
 function permKeyToPaths(permKeys) {
+
 	const paths = [];
+
 	for (const key of permKeys) {
 		const routeList = premKey[key];
 		if (routeList && Array.isArray(routeList)) {
