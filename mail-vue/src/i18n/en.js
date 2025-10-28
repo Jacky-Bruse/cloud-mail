@@ -292,7 +292,7 @@ const en = {
     include: 'Include',
     delAllEmailConfirm: 'Do you really want to delete it?',
     s3Configuration: 'S3 Configuration',
-    s3Desc: 'If another S3-compatible storage is configured, R2 will take priority if it's already connected',
+    s3Desc: 'If another S3-compatible storage is configured, R2 will take priority if it\'s already connected',
     confirmDeletionOfContacts: 'Confirm clearing contacts?',
     recentContacts: 'Recent contacts',
     selectContacts: 'Select',
