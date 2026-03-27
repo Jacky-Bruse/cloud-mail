@@ -19,6 +19,7 @@ jobs:
       DOMAIN: ${{ secrets.DOMAIN || vars.DOMAIN }}
       ADMIN: ${{ secrets.ADMIN || vars.ADMIN }}
       JWT_SECRET: ${{ secrets.JWT_SECRET || vars.JWT_SECRET }}
+      INIT_URL: ${{ secrets.INIT_URL || vars.INIT_URL }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN || vars.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
       D1_DATABASE_ID: ${{ secrets.D1_DATABASE_ID || vars.D1_DATABASE_ID }}
@@ -231,15 +232,11 @@ jobs:
           echo "🛠️ Starting database initialization..."
           sleep 15
           
-          # Prefer the workers.dev URL in CI to avoid custom-domain WAF/bot challenges.
-          WORKER_URL="${{ steps.deploy.outputs.worker_url }}"
-          if [ -z "$WORKER_URL" ] && [ -n "$CUSTOM_DOMAIN" ]; then
-            WORKER_URL="https://$CUSTOM_DOMAIN"
-          fi
+          WORKER_URL="${INIT_URL:-${{ steps.deploy.outputs.worker_url }}}"
           
           if [ -z "$WORKER_URL" ]; then
-            echo "❌ Worker URL not available from deploy output or CUSTOM_DOMAIN."
-            exit 1
+            echo "::warning::Automatic database initialization skipped. Set INIT_URL to enable CI initialization, or initialize manually after deployment."
+            exit 0
           fi
           
           HTTP_CODE=$(curl -sL -w "%{http_code}" -o response.txt "$WORKER_URL/api/init/${JWT_SECRET}")
@@ -248,8 +245,13 @@ jobs:
           if [ "$RESPONSE_BODY" = "success" ]; then
             echo "✅ Setup completed."
           else
-            echo "❌ Failed. HTTP: $HTTP_CODE, Response: $RESPONSE_BODY"
-            exit 1
+            if [ -n "$INIT_URL" ]; then
+              echo "❌ Failed. HTTP: $HTTP_CODE, Response: $RESPONSE_BODY"
+              exit 1
+            fi
+            echo "::warning::Automatic database initialization failed for '$WORKER_URL'. Initialize manually after deployment or set INIT_URL to a CI-accessible endpoint."
+            echo "::warning::HTTP: $HTTP_CODE"
+            exit 0
           fi
 
       - name: 🗑️ 删除运行记录 / Delete workflow runs
